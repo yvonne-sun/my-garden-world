@@ -407,6 +407,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            max-width: 200px;
         }
 
         .manual-refresh-btn:hover {
@@ -441,10 +442,6 @@
         </div>
         <div class="nav-links">
             <a href="#" class="nav-item active" id="redeemNavBtn">🎁 兑换码</a>
-            <div class="auto-refresh-bar">
-                <span class="refresh-indicator"></span>
-                <span>🔄 每分钟自动更新</span>
-            </div>
         </div>
     </div>
 </header>
@@ -654,10 +651,6 @@
 
             if (validItems.length === 0) {
                 container.innerHTML = `
-                    <div class="redeem-header">
-                        <h2>🎁 有效兑换码中心</h2>
-                        <div class="valid-badge">✨ 实时过滤 · 自动更新</div>
-                    </div>
                     <div class="empty-redeem">✨ 暂时没有有效的兑换码<br>可能礼包都已过期，请稍后再来看看~</div>
                 `;
                 return;
@@ -709,10 +702,6 @@
             const manualRefreshHtml = `<button id="manualRefreshBtn" class="manual-refresh-btn">🔄 手动刷新</button>`;
 
             container.innerHTML = `
-                <div class="redeem-header">
-                    <h2>🎁 有效兑换码中心</h2>
-                    <div class="valid-badge">✨ 仅展示有效期内礼包</div>
-                </div>
                 <div class="stats-bar">
                     <div class="info-area">
                         📦 当前有效礼包总数: <strong id="totalValidSpan">${validItems.length}</strong>
