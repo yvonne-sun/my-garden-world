@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>兑换码中心 - 花园小铺</title>
+    <title>兑换码中心 - 自动更新 | 花园小铺</title>
     <style>
         * {
             margin: 0;
@@ -87,6 +87,32 @@
             font-weight: 600;
         }
 
+        /* 自动刷新状态栏 */
+        .auto-refresh-bar {
+            background: #eef2f6;
+            border-radius: 30px;
+            padding: 6px 18px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c6e4f;
+        }
+
+        .refresh-indicator {
+            width: 8px;
+            height: 8px;
+            background: #2b8c55;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
         /* 主内容区 */
         .main-content {
             flex: 1;
@@ -96,7 +122,7 @@
             width: 100%;
         }
 
-        /* 兑换码页面专用样式 */
+        /* 兑换码页面样式 - 无分页版本 */
         .redeem-header {
             margin-bottom: 28px;
             display: flex;
@@ -128,21 +154,11 @@
             font-size: 0.85rem;
         }
 
-        .filter-tip {
-            background: #f0f4fa;
-            border-radius: 30px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            display: inline-block;
-            margin-bottom: 16px;
-            color: #2c6280;
-        }
-
-        .pagination-bar {
+        .stats-bar {
             background: white;
             border-radius: 24px;
-            padding: 14px 20px;
-            margin: 16px 0 28px;
+            padding: 12px 24px;
+            margin: 16px 0 24px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -158,6 +174,10 @@
             padding: 5px 14px;
             border-radius: 40px;
             color: #1e4a76;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .info-area strong {
@@ -165,63 +185,23 @@
             font-size: 1.1rem;
         }
 
-        .page-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
+        .last-update {
+            font-size: 0.7rem;
+            color: #6c86a3;
+            font-weight: normal;
         }
 
-        .jump-wrap {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            background: #f8fafc;
-            padding: 4px 14px;
-            border-radius: 40px;
-            border: 1px solid #e2e8f0;
+        .filter-tip {
+            background: #f0f4fa;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 16px;
+            color: #2c6280;
         }
 
-        .jump-wrap input {
-            width: 65px;
-            padding: 6px 0 6px 10px;
-            border: none;
-            background: transparent;
-            font-size: 0.85rem;
-            font-weight: 500;
-            outline: none;
-        }
-
-        .page-btn-redeem {
-            background: white;
-            border: 1px solid #dce3ec;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #2c3e50;
-        }
-
-        .page-btn-redeem:hover:not(:disabled) {
-            background: #eef2fa;
-            border-color: #b9c4d4;
-            transform: translateY(-1px);
-        }
-
-        .page-btn-redeem.active-page {
-            background: #1e7b48;
-            border-color: #1e7b48;
-            color: white;
-            box-shadow: 0 2px 6px rgba(30, 123, 72, 0.2);
-        }
-
-        .page-btn-redeem:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
+        /* 网格布局 - 无分页，全部展示 */
         .redeem-card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -369,6 +349,9 @@
             display: flex;
             justify-content: center;
             padding: 60px 20px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
 
         .spinner {
@@ -394,6 +377,43 @@
             font-size: 0.75rem;
         }
 
+        .refresh-notice {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2a3e;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 手动刷新按钮 */
+        .manual-refresh-btn {
+            background: white;
+            border: 1px solid #cddfe7;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #2c6e4f;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .manual-refresh-btn:hover {
+            background: #e9f4ef;
+            border-color: #9bc6ae;
+        }
+
         @media (max-width: 640px) {
             .nav-container {
                 padding: 0 18px;
@@ -401,15 +421,12 @@
             .redeem-card-grid {
                 grid-template-columns: 1fr;
             }
-            .pagination-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .page-controls {
-                justify-content: center;
-            }
             .redeem-header h2 {
                 font-size: 1.4rem;
+            }
+            .stats-bar {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -424,41 +441,44 @@
         </div>
         <div class="nav-links">
             <a href="#" class="nav-item active" id="redeemNavBtn">🎁 兑换码</a>
+            <div class="auto-refresh-bar">
+                <span class="refresh-indicator"></span>
+                <span>🔄 每分钟自动更新</span>
+            </div>
         </div>
     </div>
 </header>
 
 <main class="main-content" id="mainContent">
-    <!-- 兑换码页面将动态渲染在此，无首页内容 -->
-    <div id="redeepPageContainer"></div>
+    <div id="redeemPageContainer"></div>
 </main>
 
 <footer class="footer">
-    <p>🍃 仅展示有效期内礼包 · 自动过滤过期/未开始兑换码 · 一键复制前往游戏兑换</p>
+    <p>🍃 仅展示有效期内礼包 · 自动过滤过期/未开始兑换码 · 每分钟自动获取最新数据 · 全部有效礼包一览无余</p>
 </footer>
+<div id="refreshNotice" class="refresh-notice">✨ 兑换码已自动更新</div>
 
 <script>
-    // 页面启动后直接构建兑换码完整功能，无首页组件
     (function() {
         // ---------- API 配置 ----------
         const BASE_URL = 'https://ap.xiaopidd.com/api.AppletNXH/getNxhncodesListOnPage';
-        const LIMIT = 10;          // 原始API每页数量
-        const PAGE_SIZE = 10;      // 前端展示每页有效礼包数量
-        
-        // 全局状态
+        const LIMIT = 100;         // 每页拉取更多数据，减少请求次数（API最大支持? 稳妥用50）
+        const REFRESH_INTERVAL_MS = 60 * 1000; // 60秒 = 1分钟自动刷新
+
+        // 全局状态 - 无分页，只存储所有有效兑换码
         let allRawItems = [];           // 所有原始礼包
-        let validItems = [];            // 过滤后的有效礼包列表
-        let currentPage = 1;
-        let totalValid = 0;
-        let totalValidPages = 1;
+        let validItems = [];            // 过滤后的有效礼包列表（全部，不分页）
         let totalBackendPages = 1;
         let loadedPages = new Set();
         let isLoading = false;
-        
+        let refreshTimer = null;
+        let lastUpdateTime = null;
+
         // DOM 元素
-        const container = document.getElementById('redeepPageContainer');
-        
-        // 辅助函数
+        const container = document.getElementById('redeemPageContainer');
+        const refreshNotice = document.getElementById('refreshNotice');
+
+        // 显示提示消息
         function showToastMessage(msg, duration = 1800) {
             let toast = document.getElementById('globalToast');
             if (!toast) {
@@ -487,7 +507,16 @@
                 toast.style.opacity = '0';
             }, duration);
         }
-        
+
+        // 显示刷新通知
+        function showRefreshNotice() {
+            if (!refreshNotice) return;
+            refreshNotice.style.opacity = '1';
+            setTimeout(() => {
+                refreshNotice.style.opacity = '0';
+            }, 1500);
+        }
+
         async function copyToClipboard(text) {
             if (!text || text === '') {
                 showToastMessage('❌ 无兑换码', 1000);
@@ -508,8 +537,8 @@
                 return true;
             }
         }
-        
-        // 有效期判断
+
+        // 有效期判断（基于服务器时间戳秒）
         function isGiftValid(item) {
             const now = Math.floor(Date.now() / 1000);
             const st = item.stime_int !== undefined ? item.stime_int : 0;
@@ -521,19 +550,16 @@
             if (et !== 0 && now > et) return false;
             return true;
         }
-        
+
         // 获取过期样式和标签
         function getExpiryInfo(item) {
             const now = Math.floor(Date.now() / 1000);
             const st = item.stime_int || 0;
             const et = item.etime_int || 0;
-            
-            // 永久有效
             if (item.shixiao === 2 && (st === 0 && et === 0)) {
                 return { class: '', label: '永久有效', labelClass: 'permanent' };
             }
             if (st === 0 && et === 0) return { class: '', label: '', labelClass: '' };
-            
             if (et !== 0 && now <= et) {
                 const remainSec = et - now;
                 const hoursLeft = remainSec / 3600;
@@ -549,86 +575,99 @@
             }
             return { class: '', label: '', labelClass: '' };
         }
-        
-        // 请求单页原始数据
-        async function fetchRawPage(page) {
-            const url = `${BASE_URL}?page=${page}&limit=${LIMIT}&fid=1`;
+
+        // 请求单页原始数据（增大limit以减少请求次数）
+        async function fetchRawPage(page, customLimit = LIMIT) {
+            const url = `${BASE_URL}?page=${page}&limit=${customLimit}&fid=1`;
             try {
                 const resp = await fetch(url);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const result = await resp.json();
                 if (result.code === 0 && result.data) {
-                    const { data, last_page } = result.data;
-                    if (!totalBackendPages && last_page) totalBackendPages = last_page;
-                    return { success: true, items: Array.isArray(data) ? data : [], lastPage: last_page };
+                    const { data, last_page, total } = result.data;
+                    return { success: true, items: Array.isArray(data) ? data : [], lastPage: last_page, total: total };
                 }
                 return { success: false, msg: result.msg };
             } catch (err) {
                 return { success: false, msg: err.message };
             }
         }
-        
-        // 加载所有缺失的原始分页（全量拉取，实现有效兑换码全量分页）
-        async function loadAllRawData(showLoading = true) {
+
+        // 核心：加载所有数据（全量拉取，尽可能用较大的limit减少请求）
+        async function loadAllData(silent = false) {
             if (isLoading) return;
             isLoading = true;
-            if (showLoading && container) {
-                container.innerHTML = `<div class="loading-spinner"><div class="spinner"></div><div style="margin-top:12px; color:#5e7b6e;">正在获取有效礼包库...</div></div>`;
+
+            if (!silent && container) {
+                container.innerHTML = `<div class="loading-spinner"><div class="spinner"></div><div>正在获取最新礼包...</div></div>`;
             }
-            // 先获取第一页获得总页数
-            if (totalBackendPages === 1 && allRawItems.length === 0) {
-                const first = await fetchRawPage(1);
-                if (first.success && first.items) {
-                    allRawItems.push(...first.items);
-                    loadedPages.add(1);
-                    if (first.lastPage) totalBackendPages = first.lastPage;
-                } else {
-                    isLoading = false;
-                    if (container) container.innerHTML = `<div class="empty-redeem">❌ 网络或接口异常，请刷新重试</div>`;
-                    return;
-                }
+
+            // 重置状态
+            allRawItems = [];
+            loadedPages.clear();
+            totalBackendPages = 1;
+
+            // 先获取第一页，同时获取总页数
+            const first = await fetchRawPage(1, 100);
+            if (!first.success || !first.items) {
+                isLoading = false;
+                if (container) container.innerHTML = `<div class="empty-redeem">❌ 接口异常，请刷新页面重试<br>${first.msg || ''}</div>`;
+                return;
             }
-            const targetTotal = totalBackendPages;
-            if (targetTotal > 1) {
+            allRawItems.push(...first.items);
+            loadedPages.add(1);
+            if (first.lastPage) totalBackendPages = first.lastPage;
+
+            // 如果总页数大于1，继续加载剩余页面（使用limit=100加速）
+            if (totalBackendPages > 1) {
                 const promises = [];
-                for (let p = 2; p <= targetTotal; p++) {
-                    if (!loadedPages.has(p)) {
-                        promises.push(fetchRawPage(p).then(res => res.success ? res.items : []));
-                    }
+                for (let p = 2; p <= totalBackendPages; p++) {
+                    promises.push(fetchRawPage(p, 100).then(res => res.success ? res.items : []));
                 }
                 const results = await Promise.all(promises);
                 for (const items of results) {
                     if (items.length) allRawItems.push(...items);
-                    // 记录已加载（粗略标记，实际页码通过索引递增，不影响功能）
                 }
-                for (let i = 2; i <= targetTotal; i++) loadedPages.add(i);
+                for (let i = 2; i <= totalBackendPages; i++) loadedPages.add(i);
             }
-            // 重建有效列表
-            validItems = allRawItems.filter(item => isGiftValid(item));
-            totalValid = validItems.length;
-            totalValidPages = Math.ceil(totalValid / PAGE_SIZE);
-            if (totalValidPages === 0) totalValidPages = 1;
-            if (currentPage > totalValidPages) currentPage = 1;
+
+            // 过滤有效礼包（仅展示有效期内）
+            const newValidItems = allRawItems.filter(item => isGiftValid(item));
+            validItems = newValidItems;
+            lastUpdateTime = new Date();
             isLoading = false;
+
+            // 渲染UI
             renderRedeemUI();
-            renderPagination();
+
+            // 静默刷新时显示更新提示
+            if (silent) {
+                showRefreshNotice();
+                const updateTimeStr = `${lastUpdateTime.getHours().toString().padStart(2,'0')}:${lastUpdateTime.getMinutes().toString().padStart(2,'0')}:${lastUpdateTime.getSeconds().toString().padStart(2,'0')}`;
+                showToastMessage(`🔄 已自动更新 · ${updateTimeStr} · 共${validItems.length}个有效礼包`, 1500);
+            }
         }
-        
-        // 渲染当前页有效礼包
+
+        // 渲染所有有效礼包（无分页，全部展示）
         function renderRedeemUI() {
             if (!container) return;
+
             if (validItems.length === 0) {
-                container.innerHTML = `<div class="empty-redeem">✨ 暂时没有有效的兑换码<br>可能礼包都已过期，请稍后再来看看~</div>`;
+                container.innerHTML = `
+                    <div class="redeem-header">
+                        <h2>🎁 有效兑换码中心</h2>
+                        <div class="valid-badge">✨ 实时过滤 · 自动更新</div>
+                    </div>
+                    <div class="empty-redeem">✨ 暂时没有有效的兑换码<br>可能礼包都已过期，请稍后再来看看~</div>
+                `;
                 return;
             }
-            const start = (currentPage - 1) * PAGE_SIZE;
-            const pageItems = validItems.slice(start, start + PAGE_SIZE);
-            if (pageItems.length === 0) {
-                container.innerHTML = `<div class="empty-redeem">📭 当前页无有效礼包，试试其他页</div>`;
-                return;
-            }
-            
-            const cardsHtml = pageItems.map(item => {
+
+            const updateTimeHtml = lastUpdateTime ?
+                `<span class="last-update">⏱️ 最后更新: ${lastUpdateTime.getHours().toString().padStart(2,'0')}:${lastUpdateTime.getMinutes().toString().padStart(2,'0')}:${lastUpdateTime.getSeconds().toString().padStart(2,'0')}</span>` : '';
+
+            // 生成所有卡片
+            const cardsHtml = validItems.map(item => {
                 const giftName = item.name || '未命名礼包';
                 const giftCode = (item.code !== undefined && item.code !== null) ? item.code : '';
                 const displayCode = giftCode === '' ? '暂无兑换码' : giftCode;
@@ -637,14 +676,16 @@
                 const cardClass = expiry.class;
                 const labelText = expiry.label;
                 const labelClass = expiry.labelClass;
-                
+
                 let dateExtra = '';
                 if (item.stime && item.etime && item.stime !== null && item.etime !== null && !(item.shixiao === 2 && item.stime_int === 0)) {
                     dateExtra = `<div class="date-hint">📆 ${item.stime} 至 ${item.etime}</div>`;
                 } else if (item.shixiao === 2 && (!item.stime || item.stime_int === 0)) {
                     dateExtra = `<div class="date-hint">🌟 永久有效，随时兑换</div>`;
+                } else if (item.stime && item.stime_int !== 0 && (!item.etime || item.etime_int === 0)) {
+                    dateExtra = `<div class="date-hint">▶️ 生效时间: ${item.stime}</div>`;
                 }
-                
+
                 return `
                     <div class="redeem-gift-card ${cardClass}">
                         <div class="card-content">
@@ -663,26 +704,27 @@
                     </div>
                 `;
             }).join('');
-            
+
+            // 手动刷新按钮
+            const manualRefreshHtml = `<button id="manualRefreshBtn" class="manual-refresh-btn">🔄 手动刷新</button>`;
+
             container.innerHTML = `
                 <div class="redeem-header">
                     <h2>🎁 有效兑换码中心</h2>
-                    <div class="valid-badge">✨ 仅展示有效期内礼包 · 分页基于有效兑换码</div>
+                    <div class="valid-badge">✨ 仅展示有效期内礼包</div>
                 </div>
-                <div class="filter-tip">⏰ 自动过滤过期/未开始 · 永久礼包长期展示</div>
-                <div class="pagination-bar" id="redeemPaginationBar">
-                    <div class="info-area">📦 有效礼包总数: <strong id="totalValidSpan">${totalValid}</strong></div>
-                    <div class="page-controls" id="pageControls"></div>
-                    <div class="jump-wrap">
-                        跳转第 <input type="number" id="jumpPageInput" min="1" value="${currentPage}" max="${totalValidPages}"> 页
-                        <button id="jumpConfirmBtn" class="page-btn-redeem">GO</button>
+                <div class="stats-bar">
+                    <div class="info-area">
+                        📦 当前有效礼包总数: <strong id="totalValidSpan">${validItems.length}</strong>
+                        ${updateTimeHtml}
                     </div>
+                    ${manualRefreshHtml}
                 </div>
                 <div class="redeem-card-grid" id="redeemCardGrid">
                     ${cardsHtml}
                 </div>
             `;
-            
+
             // 绑定复制按钮
             document.querySelectorAll('.copy-action').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -692,76 +734,20 @@
                     else showToastMessage('⚠️ 无兑换码', 1000);
                 });
             });
-            
-            // 更新总数显示
-            const totalSpan = document.getElementById('totalValidSpan');
-            if (totalSpan) totalSpan.innerText = totalValid;
-        }
-        
-        function renderPagination() {
-            const pageControlsDiv = document.getElementById('pageControls');
-            if (!pageControlsDiv) return;
-            let btnsHtml = '';
-            btnsHtml += `<button class="page-btn-redeem" id="prevPageBtn" ${currentPage <= 1 ? 'disabled' : ''}>◀ 上一页</button>`;
-            
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalValidPages, currentPage + 2);
-            if (startPage > 1) {
-                btnsHtml += `<button class="page-btn-redeem page-num" data-page="1">1</button>`;
-                if (startPage > 2) btnsHtml += `<span style="padding:0 6px;">...</span>`;
-            }
-            for (let i = startPage; i <= endPage; i++) {
-                btnsHtml += `<button class="page-btn-redeem page-num ${i === currentPage ? 'active-page' : ''}" data-page="${i}">${i}</button>`;
-            }
-            if (endPage < totalValidPages) {
-                if (endPage < totalValidPages - 1) btnsHtml += `<span style="padding:0 6px;">...</span>`;
-                btnsHtml += `<button class="page-btn-redeem page-num" data-page="${totalValidPages}">${totalValidPages}</button>`;
-            }
-            btnsHtml += `<button class="page-btn-redeem" id="nextPageBtn" ${currentPage >= totalValidPages ? 'disabled' : ''}>下一页 ▶</button>`;
-            pageControlsDiv.innerHTML = btnsHtml;
-            
-            // 绑定页码点击
-            document.querySelectorAll('.page-num').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const target = parseInt(btn.getAttribute('data-page'), 10);
-                    if (!isNaN(target) && target !== currentPage) {
-                        currentPage = target;
-                        renderRedeemUI();
-                        renderPagination();
-                        const jumpInput = document.getElementById('jumpPageInput');
-                        if (jumpInput) jumpInput.value = currentPage;
-                        window.scrollTo({ top: 280, behavior: 'smooth' });
-                    }
+
+            // 绑定手动刷新按钮
+            const manualBtn = document.getElementById('manualRefreshBtn');
+            if (manualBtn) {
+                manualBtn.addEventListener('click', () => {
+                    showToastMessage('🔄 正在手动刷新...', 800);
+                    loadAllData(false);
                 });
-            });
-            
-            const prevBtn = document.getElementById('prevPageBtn');
-            const nextBtn = document.getElementById('nextPageBtn');
-            if (prevBtn) prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderRedeemUI(); renderPagination(); const inp = document.getElementById('jumpPageInput'); if(inp) inp.value = currentPage; window.scrollTo({ top: 280, behavior: 'smooth' }); } };
-            if (nextBtn) nextBtn.onclick = () => { if (currentPage < totalValidPages) { currentPage++; renderRedeemUI(); renderPagination(); const inp = document.getElementById('jumpPageInput'); if(inp) inp.value = currentPage; window.scrollTo({ top: 280, behavior: 'smooth' }); } };
-            
-            const jumpBtn = document.getElementById('jumpConfirmBtn');
-            const jumpInput = document.getElementById('jumpPageInput');
-            if (jumpBtn && jumpInput) {
-                jumpBtn.onclick = () => {
-                    let target = parseInt(jumpInput.value, 10);
-                    if (isNaN(target)) target = currentPage;
-                    if (target < 1) target = 1;
-                    if (target > totalValidPages) target = totalValidPages;
-                    if (target !== currentPage) {
-                        currentPage = target;
-                        renderRedeemUI();
-                        renderPagination();
-                        jumpInput.value = currentPage;
-                        window.scrollTo({ top: 280, behavior: 'smooth' });
-                    } else {
-                        showToastMessage(`已在第${target}页`, 900);
-                    }
-                };
-                jumpInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') jumpBtn.click(); });
             }
+
+            const totalSpan = document.getElementById('totalValidSpan');
+            if (totalSpan) totalSpan.innerText = validItems.length;
         }
-        
+
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
@@ -770,9 +756,23 @@
             if (!str) return '';
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-        
-        // 启动：加载全量数据
-        loadAllRawData(true);
+
+        // 启动自动刷新定时器（每分钟一次，静默刷新）
+        function startAutoRefresh() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(() => {
+                // 静默刷新：不显示全屏loading，只后台拉取数据并更新界面
+                loadAllData(true);
+            }, REFRESH_INTERVAL_MS);
+        }
+
+        // 初始化：首次加载全量数据并开启定时器
+        async function init() {
+            await loadAllData(false);
+            startAutoRefresh();
+        }
+
+        init();
     })();
 </script>
 </body>
